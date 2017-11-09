@@ -17,7 +17,7 @@ import java.util.concurrent.*;
  */
 public class DateFormatWrapper {
 
-    private static final int THREAD_NUMBER = 10;
+    private static final int THREAD_NUMBER = 50;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = ThreadLocal.withInitial(
             () -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -31,20 +31,32 @@ public class DateFormatWrapper {
         return sdf.get().parse(str);
     }
 
+
+    static final SimpleDateFormat sdfs = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    public static String formats(Date date) {
+        return sdfs.format(date);
+    }
+
+    public static Date parses(String str) throws ParseException {
+        return sdfs.parse(str);
+    }
+
+
     @Test
-    public void testSimpleDateFormat(){
-        ExecutorService threadPool= Executors.newCachedThreadPool();//创建一个无大小限制的线程池
+    public void testSimpleDateFormat() {
+        ExecutorService threadPool = Executors.newCachedThreadPool();//创建一个无大小限制的线程池
 
-        List<Future<?>> futures=new ArrayList<>();
+        List<Future<?>> futures = new ArrayList<>();
 
-        for(int i=0;i<THREAD_NUMBER;i++){
-            DateFormatTask task=new DateFormatTask();
-            Future<?> future=threadPool.submit(task);//将任务提交到线程池
+        for (int i = 0; i < THREAD_NUMBER; i++) {
+            DateFormatTask task = new DateFormatTask();
+            Future<?> future = threadPool.submit(task);//将任务提交到线程池
 
             futures.add(future);
         }
 
-        for(Future<?> future : futures){
+        for (Future<?> future : futures) {
             try {
                 future.get();
             } catch (InterruptedException e) {
@@ -55,13 +67,13 @@ public class DateFormatWrapper {
         }
     }
 
-    static class DateFormatTask implements Callable<Void>{
+    static class DateFormatTask implements Callable<Void> {
 
         @Override
         public Void call() throws Exception {
-            String str=DateFormatWrapper.format(
+            String str = DateFormatWrapper.format(
                     DateFormatWrapper.parse("2017-11-11 00:00:00"));
-            System.out.println(Thread.currentThread().getName()+"-> "+str);
+            System.out.println(Thread.currentThread().getName() + "-> " + str);
             return null;
         }
     }
